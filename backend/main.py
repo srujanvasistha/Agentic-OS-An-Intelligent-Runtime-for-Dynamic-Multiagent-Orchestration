@@ -25,12 +25,13 @@ from monitor.system_monitor import get_system_state
 from scheduler.task import AgentType, Task, TaskStatus
 from results_csv import append_result
 from policy.engine import configure_policy_engine, get_enforcement_enabled, set_enforcement_enabled
+from memory.store import MemoryStore
 
 
 app = FastAPI(
     title="AgentOS",
     description="AI-native operating environment prototype",
-    version="0.3.0",
+    version="0.4.0",
 )
 
 app.add_middleware(
@@ -68,7 +69,11 @@ policy_engine = configure_policy_engine(
     metrics_path=metrics_path,
     enforcement=get_enforcement_enabled(),
 )
-runtime = AgentRuntime(task_manager, agent_manager, results_path=results_path, monitor=get_system_state)
+memory_store = MemoryStore()
+runtime = AgentRuntime(
+    task_manager, agent_manager, results_path=results_path, monitor=get_system_state,
+    memory=memory_store, metrics_path=metrics_path,
+)
 
 
 class TaskRequest(BaseModel):
@@ -122,6 +127,7 @@ def status():
         "concurrency_limit": runtime.concurrency_limit,
         "model_tier": runtime.model_tier,
         "policy_enforcement": policy_engine.enforcement,
+        "memory_entries": runtime.memory.size(),
     }
 
 
@@ -219,6 +225,17 @@ def runtime_step():
     if result is None:
         return {"message": "No queued tasks", "result": None}
     return {"result": result.model_dump(mode="json")}
+
+
+@app.get("/api/memory")
+def get_memory():
+    return {"entries": [entry.__dict__ for entry in runtime.memory.recent(10)]}
+
+
+@app.delete("/api/memory")
+def clear_memory():
+    runtime.memory.clear()
+    return {"cleared": True, "entries": 0}
 
 
 @app.get("/api/tasks")

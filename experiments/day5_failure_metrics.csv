@@ -1,0 +1,2 @@
+timestamp,task_id,event,value,metadata
+2026-10-08T09:32:47.774488,day5-denied,tool_blocked,,"{""agent"": ""GeneralAgent"", ""reason"": ""Tool execution denied by policy: 'filesystem' is not permitted for agent 'GeneralAgent'."", ""tool"": ""filesystem""}"

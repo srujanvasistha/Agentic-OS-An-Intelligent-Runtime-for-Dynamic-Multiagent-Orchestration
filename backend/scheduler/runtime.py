@@ -10,6 +10,8 @@ import os
 
 from schemas import Task, TaskResult, TaskStatus
 from results_csv import append_result
+from policy.metrics import append_metric
+from memory.store import MemoryStore
 from scheduler.config import default_model_tier, max_concurrency, model_for_tier
 
 
@@ -22,6 +24,8 @@ class AgentRuntime:
         monitor=None,
         model_tier: str | None = None,
         concurrency_limit: int | None = None,
+        memory=None,
+        metrics_path: Path | None = None,
     ):
         self.task_manager = task_manager
         self.agent_manager = agent_manager
@@ -31,6 +35,8 @@ class AgentRuntime:
         self.concurrency_limit = concurrency_limit or max_concurrency()
         if self.concurrency_limit not in (1, 2):
             raise ValueError("concurrency_limit must be 1 or 2")
+        self.memory = memory or MemoryStore()
+        self.metrics_path = metrics_path
 
     def submit(self, task: Task) -> Task:
         return self.task_manager.create_task(task)
@@ -71,7 +77,9 @@ class AgentRuntime:
             state = self.get_system_state()
             tier = self._select_model_tier(task, state)
             agent.configure_model(model_for_tier(tier))
-            response = agent.run(task.prompt)
+            memory_context = self.memory.context_for(task.prompt)
+            prompt = f"{memory_context}\n\nCurrent task:\n{task.prompt}" if memory_context else task.prompt
+            response = agent.run(prompt)
             llm = agent.last_llm_response
             self.task_manager.mark_done(task)
             result = TaskResult(
@@ -88,6 +96,7 @@ class AgentRuntime:
             )
         except PermissionError as exc:
             self.task_manager.mark_blocked(task)
+            self._record_metric(task.id, "task_blocked", metadata={"error": str(exc)})
             result = TaskResult(
                 task_id=task.id, status=TaskStatus.BLOCKED,
                 agent=agent.name if agent else None,
@@ -97,6 +106,8 @@ class AgentRuntime:
             )
         except Exception as exc:
             self.task_manager.mark_failed(task)
+            event = "model_timeout" if "timeout" in str(exc).lower() else "task_failed"
+            self._record_metric(task.id, event, metadata={"error": str(exc)})
             result = TaskResult(
                 task_id=task.id, status=TaskStatus.FAILED,
                 agent=agent.name if agent else None,
@@ -106,6 +117,10 @@ class AgentRuntime:
                 error=str(exc),
             )
 
+        if result.status == TaskStatus.DONE:
+            self.memory.remember(task.id, task.prompt, result.status.value, result.response)
+        else:
+            self.memory.remember(task.id, task.prompt, result.status.value, result.error or result.response)
         if self.results_path:
             self._record(task, result)
         return result
@@ -143,6 +158,10 @@ class AgentRuntime:
         while self.task_manager.queue_size() > 0:
             results.extend(self.run_pending())
         return results
+
+    def _record_metric(self, task_id: str, event: str, metadata=None) -> None:
+        if self.metrics_path:
+            append_metric(self.metrics_path, task_id, event, metadata=metadata)
 
     def _record(self, task: Task, result: TaskResult) -> None:
         append_result(self.results_path, {

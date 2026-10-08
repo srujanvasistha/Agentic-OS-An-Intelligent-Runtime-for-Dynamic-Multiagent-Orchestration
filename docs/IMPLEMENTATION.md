@@ -53,3 +53,13 @@ The policy layer is the mandatory capability boundary. Agents do not directly in
 ## Day 4 Policy Ablation Contract
 
 `AGENTOS_POLICY_ENFORCEMENT=on` is the normal secure configuration. `AGENTOS_POLICY_ENFORCEMENT=off` disables authorization decisions for experimental comparison while retaining the same tool boundary and execution path. This makes the Day 6 comparison an implementation-level ablation rather than a separate code path.
+
+## Day 5: v1 integration freeze
+
+The Day 5 runtime adds a bounded `MemoryStore` between task execution and the next request. Completed and failed task summaries are retained in process memory, and recent entries can be inspected through `/api/memory`. The store uses deterministic lexical overlap for lightweight context retrieval and intentionally avoids an external database in the v1 prototype.
+
+The integrated request path is:
+
+`AgentOS shell → FastAPI /api/task → Task Manager → Scheduler → Agent Manager → Agent → Policy boundary → Tool/LLM → Monitor state + Memory → TaskResult → CSV/Metrics`
+
+Day 5 also freezes the experiment interfaces. MockLLM uses the same `LLMClient` contract as Ollama, result rows use `RESULT_COLUMNS`, and failure paths are represented as failed/blocked task results plus metrics events where a metrics path is configured.

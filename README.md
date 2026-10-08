@@ -271,3 +271,10 @@ TaskResult
 ## Day 4: Policy Integration
 
 Day 4 makes the policy layer the mandatory boundary for agent tool calls. FileAgent requests filesystem capabilities through `run_tool(agent, tool, args)` rather than invoking OS-facing implementations directly. Policy enforcement can be switched with `AGENTOS_POLICY_ENFORCEMENT=on|off` for the Day 6 ablation. Tool output, file contents, and logs are explicitly tagged as untrusted before they reach the LLM. Policy blocks are recorded in `experiments/metrics.csv`, and the architecture/request-flow implementation skeleton is documented in `docs/IMPLEMENTATION.md`.
+
+
+## Day 5 — Integration Freeze v1
+
+Day 5 freezes the integrated runtime baseline with scheduler, policy, monitor, memory, shell, deterministic MockLLM workload validation, failure-path tests, and the evaluation setup documented in `docs/EVALUATION_SETUP.md`.
+
+The v1 feature freeze marker is documented in `V1_FREEZE.md`. After the freeze, only bug fixes, test fixes, documentation corrections, and reproducibility fixes should be merged.
