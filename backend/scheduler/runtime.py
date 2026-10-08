@@ -67,6 +67,7 @@ class AgentRuntime:
             # Each parallel inference gets an isolated agent/client instance so
             # model selection and last_llm_response cannot race across tasks.
             agent = copy.copy(registered_agent)
+            agent.task_id = task.id
             state = self.get_system_state()
             tier = self._select_model_tier(task, state)
             agent.configure_model(model_for_tier(tier))

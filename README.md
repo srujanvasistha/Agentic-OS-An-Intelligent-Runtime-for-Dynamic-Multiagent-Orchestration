@@ -267,3 +267,7 @@ filesystem tool
    ↓
 TaskResult
 ```
+
+## Day 4: Policy Integration
+
+Day 4 makes the policy layer the mandatory boundary for agent tool calls. FileAgent requests filesystem capabilities through `run_tool(agent, tool, args)` rather than invoking OS-facing implementations directly. Policy enforcement can be switched with `AGENTOS_POLICY_ENFORCEMENT=on|off` for the Day 6 ablation. Tool output, file contents, and logs are explicitly tagged as untrusted before they reach the LLM. Policy blocks are recorded in `experiments/metrics.csv`, and the architecture/request-flow implementation skeleton is documented in `docs/IMPLEMENTATION.md`.

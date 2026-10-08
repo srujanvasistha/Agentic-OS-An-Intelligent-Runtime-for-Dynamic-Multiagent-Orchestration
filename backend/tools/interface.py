@@ -1,20 +1,9 @@
-"""Day 1 tool boundary.
+"""Frozen AgentOS tool boundary.
 
-P3 will replace the default deny-only implementation with policy-enforced
-execution. Keeping this boundary now prevents agents from gaining implicit
-OS capabilities merely because an LLM requested them.
+Every agent-facing tool call must go through policy.run_tool. The implementation
+is imported here for backwards compatibility with the Day 1 contract.
 """
 
-from typing import Any
+from policy.engine import run_tool
 
-
-def run_tool(agent: str, tool: str, args: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Return a denial until the policy layer is implemented."""
-    return {
-        "allowed": False,
-        "agent": agent,
-        "tool": tool,
-        "args": args or {},
-        "result": None,
-        "reason": "Tool execution denied: policy layer not enabled yet.",
-    }
+__all__ = ["run_tool"]

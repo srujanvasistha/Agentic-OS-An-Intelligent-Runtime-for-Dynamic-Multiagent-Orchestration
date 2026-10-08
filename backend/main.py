@@ -24,6 +24,7 @@ from scheduler.runtime import AgentRuntime
 from monitor.system_monitor import get_system_state
 from scheduler.task import AgentType, Task, TaskStatus
 from results_csv import append_result
+from policy.engine import configure_policy_engine, get_enforcement_enabled, set_enforcement_enabled
 
 
 app = FastAPI(
@@ -61,6 +62,12 @@ task_store = TaskStore()
 scheduler = create_scheduler(system_state_provider=get_system_state)
 task_manager = TaskManager(scheduler, task_store)
 results_path = Path(__file__).resolve().parents[1] / "experiments" / "results.csv"
+metrics_path = Path(__file__).resolve().parents[1] / "experiments" / "metrics.csv"
+policy_engine = configure_policy_engine(
+    registry=tool_registry,
+    metrics_path=metrics_path,
+    enforcement=get_enforcement_enabled(),
+)
 runtime = AgentRuntime(task_manager, agent_manager, results_path=results_path, monitor=get_system_state)
 
 
@@ -114,7 +121,24 @@ def status():
         "scheduler_options": list(SCHEDULER_NAMES),
         "concurrency_limit": runtime.concurrency_limit,
         "model_tier": runtime.model_tier,
+        "policy_enforcement": policy_engine.enforcement,
     }
+
+
+class EnforcementRequest(BaseModel):
+    enabled: bool
+
+
+@app.get("/api/policy")
+def policy_status():
+    return {"enforcement": policy_engine.enforcement, "mode": "enforced" if policy_engine.enforcement else "ablation"}
+
+
+@app.post("/api/policy/enforcement")
+def set_policy_enforcement(request: EnforcementRequest):
+    set_enforcement_enabled(request.enabled)
+    policy_engine.set_enforcement(request.enabled)
+    return {"enforcement": policy_engine.enforcement, "mode": "enforced" if policy_engine.enforcement else "ablation"}
 
 
 @app.post("/api/route")

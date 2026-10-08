@@ -1,7 +1,5 @@
 class ToolRegistry:
-    """
-    Central registry for AgentOS tools.
-    """
+    """Central registry for AgentOS OS-facing capabilities."""
 
     def __init__(self):
         self._tools = {}
