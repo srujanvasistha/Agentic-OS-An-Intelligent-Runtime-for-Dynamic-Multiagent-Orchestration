@@ -1,36 +1,75 @@
-"""Core AgentOS runtime loop.
+"""Core AgentOS Day 3 runtime: scheduler + monitor + bounded inference."""
 
-The runtime knows only the Scheduler interface and AgentManager. This keeps
-P2 scheduler implementations replaceable without changing execution logic.
-"""
+from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import copy
 from datetime import datetime
 from pathlib import Path
+import os
+
 from schemas import Task, TaskResult, TaskStatus
 from results_csv import append_result
+from scheduler.config import default_model_tier, max_concurrency, model_for_tier
 
 
 class AgentRuntime:
-    def __init__(self, task_manager, agent_manager, results_path: Path | None = None):
+    def __init__(
+        self,
+        task_manager,
+        agent_manager,
+        results_path: Path | None = None,
+        monitor=None,
+        model_tier: str | None = None,
+        concurrency_limit: int | None = None,
+    ):
         self.task_manager = task_manager
         self.agent_manager = agent_manager
         self.results_path = results_path
+        self.monitor = monitor
+        self.model_tier = (model_tier or default_model_tier()).lower()
+        self.concurrency_limit = concurrency_limit or max_concurrency()
+        if self.concurrency_limit not in (1, 2):
+            raise ValueError("concurrency_limit must be 1 or 2")
 
     def submit(self, task: Task) -> Task:
         return self.task_manager.create_task(task)
 
-    def run_next(self) -> TaskResult | None:
-        task = self.task_manager.next_task()
-        if task is None:
-            return None
+    def get_system_state(self) -> dict:
+        if self.monitor is None:
+            return {}
+        provider = getattr(self.monitor, "get_system_state", self.monitor)
+        return provider()
 
+    def _sync_scheduler_state(self):
+        scheduler = self.task_manager.scheduler
+        setter = getattr(scheduler, "set_system_state", None)
+        if setter:
+            setter(self.get_system_state())
+
+    def _select_model_tier(self, task: Task, state: dict) -> str:
+        configured = os.getenv("AGENTOS_MODEL_TIER", self.model_tier).lower()
+        # Resource-aware scheduling uses the small tier under sustained pressure.
+        if getattr(self.task_manager.scheduler, "name", "") == "resource_aware":
+            pressure = max(float(state.get("cpu_percent", 0)), float(state.get("memory_percent", 0)))
+            if pressure >= 80:
+                return "0.5b"
+        return configured
+
+    def _execute(self, task: Task) -> TaskResult:
         agent = None
         started = task.started_at or datetime.now()
         try:
-            agent = self.agent_manager.get_by_type(task.agent_type)
-            if agent is None:
+            registered_agent = self.agent_manager.get_by_type(task.agent_type)
+            if registered_agent is None:
                 raise ValueError(f"No agent registered for type: {task.agent_type.value}")
 
+            # Each parallel inference gets an isolated agent/client instance so
+            # model selection and last_llm_response cannot race across tasks.
+            agent = copy.copy(registered_agent)
+            state = self.get_system_state()
+            tier = self._select_model_tier(task, state)
+            agent.configure_model(model_for_tier(tier))
             response = agent.run(task.prompt)
             llm = agent.last_llm_response
             self.task_manager.mark_done(task)
@@ -49,19 +88,16 @@ class AgentRuntime:
         except PermissionError as exc:
             self.task_manager.mark_blocked(task)
             result = TaskResult(
-                task_id=task.id,
-                status=TaskStatus.BLOCKED,
+                task_id=task.id, status=TaskStatus.BLOCKED,
                 agent=agent.name if agent else None,
                 model=agent.model if agent else None,
-                response="",
-                latency_seconds=(task.completed_at - started).total_seconds(),
+                response="", latency_seconds=(task.completed_at - started).total_seconds(),
                 error=str(exc),
             )
         except Exception as exc:
             self.task_manager.mark_failed(task)
             result = TaskResult(
-                task_id=task.id,
-                status=TaskStatus.FAILED,
+                task_id=task.id, status=TaskStatus.FAILED,
                 agent=agent.name if agent else None,
                 model=agent.model if agent else None,
                 response=f"Task execution failed: {exc}",
@@ -73,12 +109,38 @@ class AgentRuntime:
             self._record(task, result)
         return result
 
+    def run_next(self) -> TaskResult | None:
+        self._sync_scheduler_state()
+        task = self.task_manager.next_task()
+        return self._execute(task) if task is not None else None
+
+    def run_pending(self, limit: int | None = None) -> list[TaskResult]:
+        """Execute up to the configured 1–2 inference tasks concurrently."""
+        self._sync_scheduler_state()
+        slots = min(limit or self.concurrency_limit, self.concurrency_limit)
+        tasks = []
+        for _ in range(slots):
+            task = self.task_manager.next_task()
+            if task is None:
+                break
+            tasks.append(task)
+        if not tasks:
+            return []
+
+        if len(tasks) == 1:
+            return [self._execute(tasks[0])]
+
+        results = []
+        with ThreadPoolExecutor(max_workers=len(tasks), thread_name_prefix="agentos-infer") as pool:
+            futures = {pool.submit(self._execute, task): task for task in tasks}
+            for future in as_completed(futures):
+                results.append(future.result())
+        return results
+
     def run_until_empty(self) -> list[TaskResult]:
         results = []
         while self.task_manager.queue_size() > 0:
-            result = self.run_next()
-            if result is not None:
-                results.append(result)
+            results.extend(self.run_pending())
         return results
 
     def _record(self, task: Task, result: TaskResult) -> None:

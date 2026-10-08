@@ -19,8 +19,9 @@ from agents.task_router import TaskRouter
 from agents.agent_manager import AgentManager
 from scheduler.task_store import TaskStore
 from scheduler.task_manager import TaskManager
-from scheduler.fifo import FIFOScheduler
+from scheduler.factory import create_scheduler, SCHEDULER_NAMES
 from scheduler.runtime import AgentRuntime
+from monitor.system_monitor import get_system_state
 from scheduler.task import AgentType, Task, TaskStatus
 from results_csv import append_result
 
@@ -57,10 +58,10 @@ agent_registry.register("SecurityAgent", security_agent)
 task_router = TaskRouter()
 agent_manager = AgentManager(agent_registry, task_router)
 task_store = TaskStore()
-fifo_scheduler = FIFOScheduler()
-task_manager = TaskManager(fifo_scheduler, task_store)
+scheduler = create_scheduler(system_state_provider=get_system_state)
+task_manager = TaskManager(scheduler, task_store)
 results_path = Path(__file__).resolve().parents[1] / "experiments" / "results.csv"
-runtime = AgentRuntime(task_manager, agent_manager, results_path=results_path)
+runtime = AgentRuntime(task_manager, agent_manager, results_path=results_path, monitor=get_system_state)
 
 
 class TaskRequest(BaseModel):
@@ -109,6 +110,10 @@ def status():
         "agents": len(agent_registry.list_agents()),
         "tasks": task_store.count(),
         "queued": task_manager.queue_size(),
+        "scheduler": getattr(task_manager.scheduler, "name", task_manager.scheduler.__class__.__name__),
+        "scheduler_options": list(SCHEDULER_NAMES),
+        "concurrency_limit": runtime.concurrency_limit,
+        "model_tier": runtime.model_tier,
     }
 
 
@@ -176,6 +181,12 @@ def get_task(task_id: str):
     if task is None:
         return {"error": "Task not found", "task_id": task_id}
     return {"task": task.model_dump(mode="json")}
+
+
+@app.post("/api/runtime/run")
+def runtime_run():
+    results = runtime.run_pending()
+    return {"results": [result.model_dump(mode="json") for result in results]}
 
 
 @app.post("/api/runtime/step")

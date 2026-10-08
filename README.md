@@ -217,3 +217,53 @@ queued → running → done
 ```
 
 The API still provides `POST /api/task` for submit-and-run behavior. For runtime integration testing, `POST /api/runtime/step` executes one queued task, and `GET /api/task/{task_id}` returns the stored task lifecycle state.
+
+\n## Day 3 — Scheduler wiring and end-to-end execution
+
+Day 3 adds four scheduler implementations behind the unchanged `Scheduler` interface:
+
+- `fifo`: first-in, first-out.
+- `round_robin`: rotates work across agent types.
+- `priority`: highest priority first.
+- `resource_aware`: uses monitor CPU/memory pressure and task estimates to choose work.
+
+Select the scheduler with `AGENTOS_SCHEDULER=fifo|round_robin|priority|resource_aware`.
+
+The runtime now consumes `get_system_state()` from `backend/monitor/system_monitor.py`,
+supports `AGENTOS_MAX_CONCURRENCY=1|2`, and supports
+`AGENTOS_MODEL_TIER=0.5b|1.5b`. Under high resource pressure, the resource-aware
+scheduler can select the 0.5B tier for responsiveness; otherwise the configured
+tier is used.
+
+The runtime batch endpoint is `POST /api/runtime/run`. The original
+`POST /api/runtime/step` remains available.
+
+### Day 3 smoke test
+
+With the backend dependencies installed:
+
+```powershell
+$env:AGENTOS_LLM_BACKEND="mock"
+.\.venv\Scripts\python.exe scripts\smoke_test.py
+```
+
+For live Ollama inference, set `AGENTOS_LLM_BACKEND=ollama` and make sure the
+selected model is installed locally.
+
+The smoke test writes `experiments/smoke_test.log` and exercises:
+
+```text
+shell/request
+   ↓
+POST /api/task
+   ↓
+configured scheduler
+   ↓
+AgentManager
+   ↓
+FileAgent
+   ↓
+filesystem tool
+   ↓
+TaskResult
+```

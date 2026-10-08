@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from llm.client import LLMClient, create_llm_client
+from llm.client import LLMClient, create_llm_client, OllamaLLMClient, MockLLMClient
 
 
 class BaseAgent(ABC):
@@ -18,6 +18,18 @@ class BaseAgent(ABC):
         self.allowed_tools = allowed_tools or []
         self.llm = llm_client or create_llm_client()
         self.last_llm_response = None
+
+    def configure_model(self, model: str):
+        """Switch the inference model while preserving the shared client abstraction."""
+        self.model = model
+        if isinstance(self.llm, OllamaLLMClient):
+            self.llm = OllamaLLMClient(
+                base_url=self.llm.base_url,
+                model=model,
+                timeout=self.llm.timeout,
+            )
+        elif isinstance(self.llm, MockLLMClient):
+            self.llm = MockLLMClient(model=f"mock-{model}", tps=self.llm.tps)
 
     def generate(self, prompt: str):
         """Generate through the shared LLM interface."""

@@ -10,6 +10,7 @@ from schemas import Task
 
 
 class FIFOScheduler(Scheduler):
+    name = 'fifo'
     def __init__(self):
         self._queue = deque()
 
