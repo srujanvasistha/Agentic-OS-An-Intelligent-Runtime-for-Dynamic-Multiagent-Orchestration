@@ -1,294 +1,151 @@
-# AgentOS
+# AgentOS — Day 7 Code Freeze (v2-final)
 
-AgentOS is an AI-native operating-environment prototype built as a Linux/system layer rather than a custom kernel. Day 1 establishes the contracts and runtime foundation used by the scheduler, agents, policy layer, and monitoring components.
+AgentOS is an AI-native runtime prototype built as an application/system layer on top of an existing operating system. It is **not a custom kernel or a finished bootable OS**. The prototype demonstrates task intake, scheduling, multi-agent dispatch, policy-gated tool use, local/mock LLM backends, bounded memory, monitoring, and reproducible validation.
 
-## Day 1 architecture
+## Current capabilities
 
-```text
-User / Frontend
-      |
-      v
- FastAPI API
-      |
-      v
- Task contract -> TaskExecutor -> Agent
-                              |
-                              v
-                    Common LLM interface
-                       /            \
-                   Ollama           Mock
-                     |                |
-              Qwen2.5-1.5B      offline tests
-```
+- FastAPI task API and task lifecycle (`queued`, `running`, `done`, `failed`, `blocked`).
+- GeneralAgent, FileAgent, and SecurityAgent behind an Agent Manager/router.
+- FIFO, round-robin, priority, and resource-aware scheduler implementations.
+- Ollama-backed local inference or deterministic MockLLM mode for offline testing.
+- Policy boundary for tool calls, with policy events and untrusted tool output handling.
+- Runtime/system metrics, bounded task history and memory, CSV experiment results.
+- Automated tests and Day 6 stability/soak validation scripts.
 
-The measured local Qwen2.5-1.5B generation rate is **20.32 tokens/sec** on the development machine. The value is stored as `DEFAULT_TPS` in `backend/llm/client.py` and is used by the mock backend as the scheduling estimate.
-
-## Project structure
+## Repository map
 
 ```text
 AgentOS/
 ├── backend/
-│   ├── agents/              # General, File, Security agents
-│   ├── llm/                 # Ollama + Mock LLM abstraction
-│   ├── scheduler/           # Task contracts, executor, task store
-│   ├── tools/               # Tools and Day 1 deny-only boundary
-│   ├── tests/               # Day 1 tests
-│   ├── main.py              # FastAPI application
-│   ├── schemas.py           # Frozen cross-component contracts
-│   └── results_csv.py       # Experiment result schema/writer
-├── experiments/             # Benchmark output
-├── frontend/                # React/Vite dashboard
-├── policies/                # Future policy enforcement layer
-├── scripts/                 # Setup and runtime scripts
+│   ├── agents/       # Agent implementations, registry, routing
+│   ├── llm/          # Ollama and MockLLM clients
+│   ├── memory/       # Bounded runtime memory
+│   ├── monitor/      # CPU/memory/system state
+│   ├── policy/       # Tool policy, untrusted-data tagging, policy metrics
+│   ├── scheduler/    # Task store/manager, runtime, scheduler strategies
+│   ├── tests/        # Day 1–Day 6 automated tests
+│   ├── tools/        # Registered tool implementations and interfaces
+│   ├── main.py       # FastAPI app and endpoints
+│   ├── schemas.py    # Shared request/result contracts
+│   └── results_csv.py
+├── docs/             # Implementation, evaluation, stability, paper setup
+├── experiments/      # CSV outputs and validation logs
+├── frontend/         # React/Vite dashboard
+├── scripts/          # Setup, smoke tests, workload and soak validation
+├── shell/            # CLI entry point
+├── deploy/           # Example systemd service
+├── requirements.txt
 ├── .env.example
-├── .gitignore
-└── requirements.txt
+└── V1_FREEZE.md
 ```
 
-## Setup on Windows
+## Prerequisites
 
-From the AgentOS root:
+- Git
+- Python 3.13 or 3.14; use a version supported by the pinned dependencies on your OS
+- Optional: Ollama plus `qwen2.5:1.5b` for real local inference
+- Optional frontend: Node.js/npm
+
+The MockLLM path does not need Ollama or internet access at runtime once Python dependencies are installed. The project is currently developed/tested as a Windows-compatible Python prototype; the longer-term OS target is Linux/Debian/Ubuntu.
+
+## Install on Windows PowerShell
+
+Run from the repository root (the folder containing `requirements.txt`):
 
 ```powershell
+python --version
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-If PowerShell blocks `Activate.ps1`, use the direct `.venv\Scripts\python.exe` commands above; activation is not required.
+If `.env` already exists, do not overwrite your local configuration. The virtual environment is intentionally not committed; recreate it on each machine. You can also run `powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1` to install dependencies and create `.env` only when missing.
 
-## Configuration
-
-`.env` controls the LLM backend:
-
-```text
-AGENTOS_LLM_BACKEND=ollama
-OLLAMA_BASE_URL=http://127.0.0.1:11434
-OLLAMA_MODEL=qwen2.5:1.5b
-OLLAMA_TIMEOUT=120
-```
-
-For a machine without Ollama, use:
+For an offline/mock setup, edit `.env` and set:
 
 ```text
 AGENTOS_LLM_BACKEND=mock
+AGENTOS_SCHEDULER=fifo
+AGENTOS_POLICY_ENFORCEMENT=on
+AGENTOS_SEED=42
 ```
 
-The mock backend never contacts a model service, so tests and offline team development do not require Ollama.
+For local inference, install Ollama separately, pull the configured model with `ollama pull qwen2.5:1.5b`, and use `AGENTOS_LLM_BACKEND=ollama`. Python package installation does not install the model weights.
 
-## Run tests
+## Test and run the backend
+
+From the repository root:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -v
 ```
 
-Day 1 currently has 17 automated tests.
-
-## Run backend
+Start the API in a separate PowerShell terminal:
 
 ```powershell
-cd backend
-..\.venv\Scripts\python.exe -m uvicorn main:app --reload
+Set-Location .\backend
+..\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-Useful endpoints:
+Open `http://127.0.0.1:8000/docs`. Useful endpoints include `GET /health`, `GET /api/status`, `GET /api/agents`, `GET /api/tools`, `POST /api/task`, `GET /api/tasks`, `GET /api/stats`, `GET /api/policy`, and `GET /api/memory`.
 
-- `GET /health`
-- `GET /api/health`
-- `GET /api/status`
-- `POST /api/task`
-- `GET /api/tasks`
-- `GET /api/tools`
-- `GET /api/agents`
-- `GET /api/stats`
+Example `POST /api/task` request body in Swagger UI:
 
-A task response includes `tokens_used`, `llm_latency_seconds`, `llm_backend`, and `latency_seconds`.
+```json
+{
+  "prompt": "Explain what the AgentOS runtime does",
+  "agent_type": "GeneralAgent",
+  "priority": 5,
+  "estimated_tokens": 128,
+  "complexity": 1,
+  "risk_level": 1,
+  "required_capabilities": []
+}
+```
 
-## Run frontend
+If the API rejects an `agent_type` value, use the enum options shown by `/docs` for the current build. The API executes a task and returns the result, status, selected agent, backend, and latency/token fields.
 
-In a second terminal:
+## Reproduce the stability and workload experiments
+
+The canonical Windows validation script creates deterministic environment variables and runs the project validation phases:
 
 ```powershell
-cd frontend
-npm run dev
+powershell -ExecutionPolicy Bypass -File .\scripts\run_day6_stability.ps1
 ```
 
-## Team Git convention
+It expects `.venv` and dependencies to be installed first. It sets the reproducibility seed to `42`, runs the Day 5 MockLLM workload, failure-path checks, and the 1,000-task Day 6 soak test. Outputs are written under `experiments/`. Use a clean working tree or copy the baseline CSVs before a run if you need to preserve prior measurements; scripts may append/update experiment output files.
 
-`main` is the protected integration branch. Each teammate works on a feature branch, opens a merge request/pull request, and merges only after the tests pass. The Day 1 scheduler/task contract, `schemas.py`, `results_csv.py`, and `tools/interface.py` should be treated as frozen interfaces after team review.
-
-Priority is an integer from 1 to 10, where 10 is urgent. Complexity and risk are integers from 1 to 5. `deadline_s` is measured in seconds from task submission. Teammates without Ollama should use `AGENTOS_LLM_BACKEND=mock`.
-
-## Security boundary
-
-`backend/tools/interface.py` is intentionally deny-only in Day 1. The LLM cannot acquire an OS capability merely by requesting a tool. P3 will connect this interface to the policy enforcement layer and the OS sandbox.
-
-
-## Day 2 architecture: agents and dispatch
-
-Day 2 adds the agent runtime layer with three specialized agents:
-
-```text
-Task
- |
- v
-AgentManager
- |
- +--> TaskRouter --> capability classification
- |
- +--> GeneralAgent  --> general reasoning/conversation
- |
- +--> FileAgent     --> workspace file operations/analysis
- |
- +--> SecurityAgent --> security/risk analysis
- |
- v
-Shared LLM interface
- |
- +--> Ollama / Qwen2.5-1.5B
- +--> MockLLM
-```
-
-`AgentManager` is the single integration point for agent selection. A task can either
-specify an explicit `agent_type`, or leave it unset so the router selects an agent
-from the task prompt. Explicit selection is useful for controlled experiments;
-automatic routing is the normal AI-shell path.
-
-The three agents intentionally share the same `BaseAgent` and LLM interface:
-
-- `GeneralAgent`: general questions, reasoning and explanations.
-- `FileAgent`: workspace listing, filename/extension search, content search and file analysis.
-- `SecurityAgent`: security, risk and authorization analysis. It does not execute commands.
-
-Day 2 does not implement the final permission sandbox. Tool authority remains
-behind the Day 1 deny-only `run_tool(...)` boundary; full policy enforcement is
-reserved for the security/policy implementation day.
-
-## Day 2 verification
-
-The test suite verifies agent registration, capability routing, explicit agent
-selection, automatic API dispatch and the `/api/route` endpoint.
+To run the MockLLM workload alone:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -v
+$env:AGENTOS_LLM_BACKEND = "mock"
+.\.venv\Scripts\python.exe .\scripts\day5_mock_workload.py
 ```
 
-The Day 2 development suite contains 25 passing tests.
-
-## Day 2 — Runtime Core
-
-Day 2 adds the runtime execution contract required by P1:
-
-```text
-Task API
-   ↓
-TaskManager
-   ↓
-Scheduler (FIFO placeholder)
-   ↓
-AgentRuntime
-   ↓
-AgentManager
-   ↓
-GeneralAgent / FileAgent / SecurityAgent
-   ↓
-TaskResult
-```
-
-Tasks use the lifecycle:
-
-```text
-queued → running → done
-                 ↘ failed
-                 ↘ blocked
-```
-
-`backend/scheduler/base.py` defines the `Scheduler` interface. The Day 2 `FIFOScheduler` is intentionally simple so P2 can replace it with Round-Robin, Priority and resource-aware schedulers without modifying `AgentRuntime`.
-
-`backend/scheduler/task_manager.py` owns task creation, queueing, status transitions and task history.
-
-`backend/scheduler/runtime.py` owns the execution loop. It asks the scheduler for the next task, obtains the correct agent from `AgentManager`, runs it and produces the frozen `TaskResult` contract.
-
-### Day 2 verification
+To run the API smoke test:
 
 ```powershell
-..\\.venv\\Scripts\\python.exe -m pytest -v
+$env:AGENTOS_LLM_BACKEND = "mock"
+.\.venv\Scripts\python.exe .\scripts\smoke_test.py
 ```
 
-The API still provides `POST /api/task` for submit-and-run behavior. For runtime integration testing, `POST /api/runtime/step` executes one queued task, and `GET /api/task/{task_id}` returns the stored task lifecycle state.
+For a meaningful experiment report, record OS/Python/dependency versions, scheduler, concurrency limit, model/backend, policy setting, seed, workload size, completion/failure counts, latency, memory and the exact CSV file used. Repeat runs where practical; do not generalize single-run memory readings as universal bounds.
 
-\n## Day 3 — Scheduler wiring and end-to-end execution
+## Experiment design and interpretation
 
-Day 3 adds four scheduler implementations behind the unchanged `Scheduler` interface:
+The code supports comparison of scheduler strategies (`fifo`, `round_robin`, `priority`, `resource_aware`) and policy enforcement on/off. Keep workload prompts and configuration constant when comparing a single factor. Report completion rate, failure/blocked rate, end-to-end latency (mean and p95 if calculated), LLM latency, token counts, memory observations, and policy allow/deny outcomes. Separate MockLLM measurements from Ollama-backed measurements: MockLLM is useful for controlled orchestration tests but is not evidence of language-model quality or real inference speed.
 
-- `fifo`: first-in, first-out.
-- `round_robin`: rotates work across agent types.
-- `priority`: highest priority first.
-- `resource_aware`: uses monitor CPU/memory pressure and task estimates to choose work.
+The archived Day 6 validation record reports 58 passing tests, five completed MockLLM workload tasks, passing checks for malformed input/model timeout/denied action/Ollama unavailable, and a 1,000-task soak with bounded history and memory. Treat these as recorded validation results from that run, not a guarantee that every clean machine will reproduce identical timings. Re-run the commands above on the target system and preserve the resulting logs/CSV evidence.
 
-Select the scheduler with `AGENTOS_SCHEDULER=fifo|round_robin|priority|resource_aware`.
+## Paper and documentation
 
-The runtime now consumes `get_system_state()` from `backend/monitor/system_monitor.py`,
-supports `AGENTOS_MAX_CONCURRENCY=1|2`, and supports
-`AGENTOS_MODEL_TIER=0.5b|1.5b`. Under high resource pressure, the resource-aware
-scheduler can select the 0.5B tier for responsiveness; otherwise the configured
-tier is used.
+- `docs/IMPLEMENTATION.md` — architecture and implementation details.
+- `docs/EVALUATION_SETUP.md` — hardware/software, model, workload, scheduler, policy and metric configuration.
+- `docs/PAPER_IMPLEMENTATION_AND_EVALUATION.md` — draft-ready Implementation and Evaluation Setup sections, with claims limited to what the prototype actually implements.
+- `DAY6_VALIDATION.md` — prior validation record.
+- `DAY7_COMPLETION.md` — Day 7 freeze and fresh-clone checklist.
 
-The runtime batch endpoint is `POST /api/runtime/run`. The original
-`POST /api/runtime/step` remains available.
+## Limitations
 
-### Day 3 smoke test
-
-With the backend dependencies installed:
-
-```powershell
-$env:AGENTOS_LLM_BACKEND="mock"
-.\.venv\Scripts\python.exe scripts\smoke_test.py
-```
-
-For live Ollama inference, set `AGENTOS_LLM_BACKEND=ollama` and make sure the
-selected model is installed locally.
-
-The smoke test writes `experiments/smoke_test.log` and exercises:
-
-```text
-shell/request
-   ↓
-POST /api/task
-   ↓
-configured scheduler
-   ↓
-AgentManager
-   ↓
-FileAgent
-   ↓
-filesystem tool
-   ↓
-TaskResult
-```
-
-## Day 4: Policy Integration
-
-Day 4 makes the policy layer the mandatory boundary for agent tool calls. FileAgent requests filesystem capabilities through `run_tool(agent, tool, args)` rather than invoking OS-facing implementations directly. Policy enforcement can be switched with `AGENTOS_POLICY_ENFORCEMENT=on|off` for the Day 6 ablation. Tool output, file contents, and logs are explicitly tagged as untrusted before they reach the LLM. Policy blocks are recorded in `experiments/metrics.csv`, and the architecture/request-flow implementation skeleton is documented in `docs/IMPLEMENTATION.md`.
-
-
-## Day 5 — Integration Freeze v1
-
-Day 5 freezes the integrated runtime baseline with scheduler, policy, monitor, memory, shell, deterministic MockLLM workload validation, failure-path tests, and the evaluation setup documented in `docs/EVALUATION_SETUP.md`.
-
-The v1 feature freeze marker is documented in `V1_FREEZE.md`. After the freeze, only bug fixes, test fixes, documentation corrections, and reproducibility fixes should be merged.
-
-
-## Day 6: stability and reproducibility
-
-Day 6 pins the Python dependencies, configures a repeatable experiment seed, bounds retained task history, protects shared runtime memory and CSV writes under concurrency, and replaces recursive stale-queue skipping. The stability suite runs in MockLLM mode so it does not require Ollama.
-
-Windows PowerShell (from the project root):
-
-```powershell
-.\scripts\setup.ps1
-.\scripts\run_day6_stability.ps1
-```
-
-For offline VM installation, see [`docs/DAY6_STABILITY.md`](docs/DAY6_STABILITY.md) and the `scripts/download_offline_dependencies.ps1` / `scripts/install_offline_dependencies.ps1` helpers. A Linux systemd template is provided at `deploy/agentos.service`.
+AgentOS is a Python runtime prototype, not a bootable OS image or a new kernel. Tool policy enforcement in this prototype is an application-level boundary and should not be represented as equivalent to kernel-enforced sandboxing. MockLLM results measure orchestration behavior, not model reasoning. A fresh-clone check is not considered complete until installation, tests, API demo, and at least one experiment have been run on the target machine.

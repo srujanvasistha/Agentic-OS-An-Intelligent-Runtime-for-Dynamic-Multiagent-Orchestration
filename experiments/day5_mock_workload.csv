@@ -1,6 +1,6 @@
 timestamp,task_id,agent,model,status,priority,complexity,risk_level,estimated_tokens,tokens_used,llm_latency_seconds,latency_seconds,llm_backend
-2026-10-08T09:32:45.850983,day5-mock-1,GeneralAgent,qwen2.5:1.5b,done,5,1,1,256,16,0.7874015748031495,7.8e-05,mock
-2026-10-08T09:32:45.851359,day5-mock-2,GeneralAgent,qwen2.5:1.5b,done,5,1,1,256,51,2.5098425196850394,0.000131,mock
-2026-10-08T09:32:45.851555,day5-mock-3,GeneralAgent,qwen2.5:1.5b,done,5,1,1,256,52,2.559055118110236,4.2e-05,mock
-2026-10-08T09:32:45.851667,day5-mock-4,GeneralAgent,qwen2.5:1.5b,done,5,1,1,256,64,3.149606299212598,3.7e-05,mock
-2026-10-08T09:32:45.851774,day5-mock-5,GeneralAgent,qwen2.5:1.5b,done,5,1,1,256,64,3.149606299212598,3.9e-05,mock
+2026-10-09T19:52:38.619335,day5-mock-1,GeneralAgent,qwen2.5:1.5b,done,5,1,1,256,16,0.7874015748031495,0.00022,mock
+2026-10-09T19:52:38.620943,day5-mock-2,GeneralAgent,qwen2.5:1.5b,done,5,1,1,256,51,2.5098425196850394,0.000158,mock
+2026-10-09T19:52:38.622038,day5-mock-3,GeneralAgent,qwen2.5:1.5b,done,5,1,1,256,52,2.559055118110236,6.8e-05,mock
+2026-10-09T19:52:38.623050,day5-mock-4,GeneralAgent,qwen2.5:1.5b,done,5,1,1,256,64,3.149606299212598,8.6e-05,mock
+2026-10-09T19:52:38.624542,day5-mock-5,GeneralAgent,qwen2.5:1.5b,done,5,1,1,256,64,3.149606299212598,8.7e-05,mock

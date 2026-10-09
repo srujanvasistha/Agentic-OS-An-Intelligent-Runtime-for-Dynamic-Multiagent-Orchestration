@@ -66,3 +66,8 @@ The current v1 workload is deterministic and does not use stochastic sampling or
 The agreed result schema is defined by `backend/results_csv.py` and includes timestamp, task/agent information, status, workload attributes, token count, LLM latency, end-to-end latency, and backend.
 
 Policy events are written to `experiments/metrics.csv`, including allowed/blocked tool calls and runtime failure events.
+
+
+## Day 7 reproducibility checklist
+
+For the paper-ready evaluation protocol, comparison controls, reporting metrics, and threats to validity, see `docs/PAPER_IMPLEMENTATION_AND_EVALUATION.md`. Before publishing final numbers, rerun the suite and workload from a fresh clone, record the exact environment and configuration, and distinguish MockLLM orchestration results from Ollama inference results. Do not treat a prior validation log as evidence that a fresh machine has already passed.
