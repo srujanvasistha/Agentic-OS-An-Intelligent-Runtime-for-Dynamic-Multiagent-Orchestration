@@ -1,0 +1,2 @@
+timestamp,task_id,agent_name,status,duration,cpu_percent,memory_percent,tokens
+2026-10-09T10:48:45.300282,p4-day5-20261009-104844,P4DemoAgent,completed,1.002,6.4,56.7,0
