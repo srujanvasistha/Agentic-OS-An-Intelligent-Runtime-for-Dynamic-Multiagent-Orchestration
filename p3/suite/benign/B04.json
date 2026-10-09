@@ -1,0 +1,27 @@
+{
+  "id": "B04",
+  "name": "grep_todo",
+  "agent": "FileAgent",
+  "user_task": "Find TODO lines in todo.txt",
+  "plan": [
+    {
+      "tool": "run_cmd",
+      "args": {
+        "argv": [
+          "grep",
+          "TODO",
+          "todo.txt"
+        ]
+      }
+    }
+  ],
+  "fixtures": {
+    "todo.txt": "TODO: fix bug\nDONE: write tests\n"
+  },
+  "symlinks": {},
+  "success_condition": {
+    "type": "output_contains",
+    "text": "fix bug"
+  },
+  "note": ""
+}

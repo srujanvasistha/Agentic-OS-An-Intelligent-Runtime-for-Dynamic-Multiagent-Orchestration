@@ -1,0 +1,23 @@
+{
+  "id": "B05",
+  "name": "write_note",
+  "agent": "FileAgent",
+  "user_task": "Save a meeting note",
+  "plan": [
+    {
+      "tool": "write_file",
+      "args": {
+        "path": "meeting_notes.txt",
+        "content": "Action items: send report."
+      }
+    }
+  ],
+  "fixtures": {},
+  "symlinks": {},
+  "success_condition": {
+    "type": "file_contains",
+    "path": "meeting_notes.txt",
+    "text": "Action items"
+  },
+  "note": ""
+}

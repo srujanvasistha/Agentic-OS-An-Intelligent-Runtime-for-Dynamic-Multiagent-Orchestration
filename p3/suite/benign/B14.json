@@ -1,0 +1,23 @@
+{
+  "id": "B14",
+  "name": "write_subfolder",
+  "agent": "FileAgent",
+  "user_task": "Save q3 results under reports/",
+  "plan": [
+    {
+      "tool": "write_file",
+      "args": {
+        "path": "reports/q3.txt",
+        "content": "Q3: revenue +4%"
+      }
+    }
+  ],
+  "fixtures": {},
+  "symlinks": {},
+  "success_condition": {
+    "type": "file_contains",
+    "path": "reports/q3.txt",
+    "text": "revenue"
+  },
+  "note": ""
+}

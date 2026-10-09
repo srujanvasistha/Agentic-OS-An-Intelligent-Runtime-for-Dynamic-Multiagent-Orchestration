@@ -1,0 +1,23 @@
+{
+  "id": "B02",
+  "name": "list_files",
+  "agent": "FileAgent",
+  "user_task": "List the files in the workspace",
+  "plan": [
+    {
+      "tool": "run_cmd",
+      "args": {
+        "argv": [
+          "ls"
+        ]
+      }
+    }
+  ],
+  "fixtures": {},
+  "symlinks": {},
+  "success_condition": {
+    "type": "output_contains",
+    "text": "notes.txt"
+  },
+  "note": ""
+}

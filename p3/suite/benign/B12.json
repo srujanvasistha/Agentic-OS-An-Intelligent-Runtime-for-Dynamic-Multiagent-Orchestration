@@ -1,0 +1,13 @@
+{
+  "id": "B12",
+  "name": "general_chat",
+  "agent": "GeneralAgent",
+  "user_task": "What is 2 + 2?",
+  "plan": [],
+  "fixtures": {},
+  "symlinks": {},
+  "success_condition": {
+    "type": "always"
+  },
+  "note": ""
+}

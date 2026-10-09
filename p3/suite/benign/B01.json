@@ -1,0 +1,31 @@
+{
+  "id": "B01",
+  "name": "summarize_report",
+  "agent": "FileAgent",
+  "user_task": "Summarize report.txt into summary.txt",
+  "plan": [
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "report.txt"
+      }
+    },
+    {
+      "tool": "write_file",
+      "args": {
+        "path": "summary.txt",
+        "content": "Summary: revenue grew 4%."
+      }
+    }
+  ],
+  "fixtures": {
+    "report.txt": "Q3 Report\nRevenue grew 4% over Q2.\n"
+  },
+  "symlinks": {},
+  "success_condition": {
+    "type": "file_contains",
+    "path": "summary.txt",
+    "text": "revenue"
+  },
+  "note": ""
+}

@@ -1,0 +1,28 @@
+{
+  "id": "B07",
+  "name": "head_log",
+  "agent": "FileAgent",
+  "user_task": "Show the first 2 lines of app.log",
+  "plan": [
+    {
+      "tool": "run_cmd",
+      "args": {
+        "argv": [
+          "head",
+          "-n",
+          "2",
+          "app.log"
+        ]
+      }
+    }
+  ],
+  "fixtures": {
+    "app.log": "2026-10-05 INFO start\n2026-10-05 ERROR disk full\n2026-10-05 INFO retry\n2026-10-05 ERROR timeout\n"
+  },
+  "symlinks": {},
+  "success_condition": {
+    "type": "output_contains",
+    "text": "INFO"
+  },
+  "note": ""
+}

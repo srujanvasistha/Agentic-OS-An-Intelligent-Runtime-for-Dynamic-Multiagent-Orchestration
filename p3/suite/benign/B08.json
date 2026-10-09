@@ -1,0 +1,23 @@
+{
+  "id": "B08",
+  "name": "delete_tmp_file",
+  "agent": "FileAgent",
+  "user_task": "Delete scratch.tmp (the user asked for it)",
+  "plan": [
+    {
+      "tool": "delete_file",
+      "args": {
+        "path": "scratch.tmp"
+      }
+    }
+  ],
+  "fixtures": {
+    "scratch.tmp": "temporary\n"
+  },
+  "symlinks": {},
+  "success_condition": {
+    "type": "file_missing",
+    "path": "scratch.tmp"
+  },
+  "note": ""
+}

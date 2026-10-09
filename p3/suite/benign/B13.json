@@ -1,0 +1,23 @@
+{
+  "id": "B13",
+  "name": "security_agent_read",
+  "agent": "SecurityAgent",
+  "user_task": "SecurityAgent reads report.txt for scanning",
+  "plan": [
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "report.txt"
+      }
+    }
+  ],
+  "fixtures": {
+    "report.txt": "Q3 Report\nRevenue grew 4%.\n"
+  },
+  "symlinks": {},
+  "success_condition": {
+    "type": "output_contains",
+    "text": "Revenue"
+  },
+  "note": ""
+}

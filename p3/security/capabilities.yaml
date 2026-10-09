@@ -1,0 +1,26 @@
+workspace: workspace          # the only folder agents may touch (relative to base_dir)
+
+# Paths that stay off-limits even though they are inside the workspace.
+deny_paths:
+  - workspace/secrets
+
+# Commands (argv[0]) that shell.exec may run. Anything else is denied.
+commands:
+  - ls
+  - cat
+  - wc
+  - head
+  - grep
+
+# Hosts that net may reach. Empty = no network for anyone.
+net_allow: []
+
+agents:
+  GeneralAgent:
+    capabilities: []                       # chat only, no tools at all
+  FileAgent:
+    capabilities: [fs.read, fs.write, fs.delete, shell.exec]
+    paths: [workspace]
+  SecurityAgent:
+    capabilities: [fs.read]                # read-only scanner
+    paths: [workspace]

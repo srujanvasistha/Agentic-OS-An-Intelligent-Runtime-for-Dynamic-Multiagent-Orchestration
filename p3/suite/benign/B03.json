@@ -1,0 +1,25 @@
+{
+  "id": "B03",
+  "name": "count_words",
+  "agent": "FileAgent",
+  "user_task": "Count the words in notes.txt",
+  "plan": [
+    {
+      "tool": "run_cmd",
+      "args": {
+        "argv": [
+          "wc",
+          "-w",
+          "notes.txt"
+        ]
+      }
+    }
+  ],
+  "fixtures": {},
+  "symlinks": {},
+  "success_condition": {
+    "type": "output_contains",
+    "text": "notes.txt"
+  },
+  "note": ""
+}
