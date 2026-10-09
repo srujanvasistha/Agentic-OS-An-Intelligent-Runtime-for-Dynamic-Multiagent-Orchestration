@@ -1,0 +1,522 @@
+[
+    {
+        "task_id": "TASK-001",
+        "task_type": "compute",
+        "priority": 3,
+        "complexity": "low",
+        "payload": {
+            "operation": "matrix_multiplication",
+            "size": 500
+        },
+        "estimated_duration": 8.4,
+        "created_at": "2026-10-08T15:29:07.315640",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-002",
+        "task_type": "compute",
+        "priority": 3,
+        "complexity": "medium",
+        "payload": {
+            "operation": "prime_generation",
+            "limit": 100000
+        },
+        "estimated_duration": 1.6,
+        "created_at": "2026-10-08T15:29:07.315663",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-003",
+        "task_type": "compute",
+        "priority": 5,
+        "complexity": "high",
+        "payload": {
+            "operation": "prime_generation",
+            "limit": 100000
+        },
+        "estimated_duration": 2.91,
+        "created_at": "2026-10-08T15:29:07.315668",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-004",
+        "task_type": "io",
+        "priority": 4,
+        "complexity": "medium",
+        "payload": {
+            "operation": "json_processing",
+            "records": 5000
+        },
+        "estimated_duration": 5.13,
+        "created_at": "2026-10-08T15:29:07.315671",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-005",
+        "task_type": "compute",
+        "priority": 3,
+        "complexity": "low",
+        "payload": {
+            "operation": "matrix_multiplication",
+            "size": 500
+        },
+        "estimated_duration": 7.7,
+        "created_at": "2026-10-08T15:29:07.315674",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-006",
+        "task_type": "compute",
+        "priority": 5,
+        "complexity": "medium",
+        "payload": {
+            "operation": "sorting",
+            "items": 10000
+        },
+        "estimated_duration": 6.26,
+        "created_at": "2026-10-08T15:29:07.315677",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-007",
+        "task_type": "data",
+        "priority": 5,
+        "complexity": "medium",
+        "payload": {
+            "operation": "data_transformation",
+            "columns": 15
+        },
+        "estimated_duration": 2.97,
+        "created_at": "2026-10-08T15:29:07.315679",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-008",
+        "task_type": "text",
+        "priority": 2,
+        "complexity": "high",
+        "payload": {
+            "operation": "text_analysis",
+            "documents": 500
+        },
+        "estimated_duration": 1.82,
+        "created_at": "2026-10-08T15:29:07.315682",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-009",
+        "task_type": "network",
+        "priority": 1,
+        "complexity": "low",
+        "payload": {
+            "operation": "api_request",
+            "endpoint": "/api/users"
+        },
+        "estimated_duration": 6.65,
+        "created_at": "2026-10-08T15:29:07.315684",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-010",
+        "task_type": "ml",
+        "priority": 4,
+        "complexity": "high",
+        "payload": {
+            "operation": "classification",
+            "samples": 5000
+        },
+        "estimated_duration": 4.46,
+        "created_at": "2026-10-08T15:29:07.315687",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-011",
+        "task_type": "network",
+        "priority": 5,
+        "complexity": "medium",
+        "payload": {
+            "operation": "health_check",
+            "service": "database"
+        },
+        "estimated_duration": 3.26,
+        "created_at": "2026-10-08T15:29:07.315689",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-012",
+        "task_type": "io",
+        "priority": 5,
+        "complexity": "low",
+        "payload": {
+            "operation": "json_processing",
+            "records": 5000
+        },
+        "estimated_duration": 7.49,
+        "created_at": "2026-10-08T15:29:07.315692",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-013",
+        "task_type": "delay",
+        "priority": 5,
+        "complexity": "medium",
+        "payload": {
+            "operation": "simulated_delay",
+            "seconds": 8
+        },
+        "estimated_duration": 4.06,
+        "created_at": "2026-10-08T15:29:07.315694",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-014",
+        "task_type": "io",
+        "priority": 3,
+        "complexity": "medium",
+        "payload": {
+            "operation": "file_read",
+            "file_size_mb": 10
+        },
+        "estimated_duration": 5.08,
+        "created_at": "2026-10-08T15:29:07.315697",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-015",
+        "task_type": "io",
+        "priority": 3,
+        "complexity": "high",
+        "payload": {
+            "operation": "file_read",
+            "file_size_mb": 10
+        },
+        "estimated_duration": 5.57,
+        "created_at": "2026-10-08T15:29:07.315699",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-016",
+        "task_type": "text",
+        "priority": 1,
+        "complexity": "high",
+        "payload": {
+            "operation": "text_analysis",
+            "documents": 500
+        },
+        "estimated_duration": 8.58,
+        "created_at": "2026-10-08T15:29:07.315701",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-017",
+        "task_type": "delay",
+        "priority": 5,
+        "complexity": "high",
+        "payload": {
+            "operation": "simulated_delay",
+            "seconds": 2
+        },
+        "estimated_duration": 2.38,
+        "created_at": "2026-10-08T15:29:07.315704",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-018",
+        "task_type": "ml",
+        "priority": 2,
+        "complexity": "high",
+        "payload": {
+            "operation": "feature_processing",
+            "features": 50
+        },
+        "estimated_duration": 9.27,
+        "created_at": "2026-10-08T15:29:07.315706",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-019",
+        "task_type": "ml",
+        "priority": 5,
+        "complexity": "medium",
+        "payload": {
+            "operation": "prediction",
+            "samples": 1000
+        },
+        "estimated_duration": 1.18,
+        "created_at": "2026-10-08T15:29:07.315708",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-020",
+        "task_type": "text",
+        "priority": 3,
+        "complexity": "medium",
+        "payload": {
+            "operation": "tokenization",
+            "words": 10000
+        },
+        "estimated_duration": 1.52,
+        "created_at": "2026-10-08T15:29:07.315712",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-021",
+        "task_type": "text",
+        "priority": 5,
+        "complexity": "low",
+        "payload": {
+            "operation": "tokenization",
+            "words": 10000
+        },
+        "estimated_duration": 7.59,
+        "created_at": "2026-10-08T15:29:07.315714",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-022",
+        "task_type": "io",
+        "priority": 1,
+        "complexity": "high",
+        "payload": {
+            "operation": "file_read",
+            "file_size_mb": 10
+        },
+        "estimated_duration": 2.16,
+        "created_at": "2026-10-08T15:29:07.315716",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-023",
+        "task_type": "delay",
+        "priority": 4,
+        "complexity": "high",
+        "payload": {
+            "operation": "simulated_delay",
+            "seconds": 2
+        },
+        "estimated_duration": 3.39,
+        "created_at": "2026-10-08T15:29:07.315719",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-024",
+        "task_type": "compute",
+        "priority": 5,
+        "complexity": "medium",
+        "payload": {
+            "operation": "matrix_multiplication",
+            "size": 500
+        },
+        "estimated_duration": 9.36,
+        "created_at": "2026-10-08T15:29:07.315721",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-025",
+        "task_type": "compute",
+        "priority": 2,
+        "complexity": "high",
+        "payload": {
+            "operation": "prime_generation",
+            "limit": 100000
+        },
+        "estimated_duration": 4.59,
+        "created_at": "2026-10-08T15:29:07.315723",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-026",
+        "task_type": "data",
+        "priority": 3,
+        "complexity": "medium",
+        "payload": {
+            "operation": "aggregation",
+            "groups": 50
+        },
+        "estimated_duration": 5.06,
+        "created_at": "2026-10-08T15:29:07.315726",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-027",
+        "task_type": "ml",
+        "priority": 2,
+        "complexity": "low",
+        "payload": {
+            "operation": "classification",
+            "samples": 5000
+        },
+        "estimated_duration": 4.04,
+        "created_at": "2026-10-08T15:29:07.315728",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-028",
+        "task_type": "text",
+        "priority": 5,
+        "complexity": "high",
+        "payload": {
+            "operation": "tokenization",
+            "words": 10000
+        },
+        "estimated_duration": 6.3,
+        "created_at": "2026-10-08T15:29:07.315730",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-029",
+        "task_type": "network",
+        "priority": 1,
+        "complexity": "low",
+        "payload": {
+            "operation": "health_check",
+            "service": "database"
+        },
+        "estimated_duration": 6.68,
+        "created_at": "2026-10-08T15:29:07.315732",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-030",
+        "task_type": "io",
+        "priority": 2,
+        "complexity": "low",
+        "payload": {
+            "operation": "file_read",
+            "file_size_mb": 10
+        },
+        "estimated_duration": 8.74,
+        "created_at": "2026-10-08T15:29:07.315734",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-031",
+        "task_type": "data",
+        "priority": 1,
+        "complexity": "high",
+        "payload": {
+            "operation": "data_cleaning",
+            "records": 10000
+        },
+        "estimated_duration": 3.51,
+        "created_at": "2026-10-08T15:29:07.315737",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-032",
+        "task_type": "compute",
+        "priority": 4,
+        "complexity": "low",
+        "payload": {
+            "operation": "sorting",
+            "items": 10000
+        },
+        "estimated_duration": 2.19,
+        "created_at": "2026-10-08T15:29:07.315739",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-033",
+        "task_type": "network",
+        "priority": 5,
+        "complexity": "high",
+        "payload": {
+            "operation": "data_fetch",
+            "source": "remote_server"
+        },
+        "estimated_duration": 3.19,
+        "created_at": "2026-10-08T15:29:07.315741",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-034",
+        "task_type": "ml",
+        "priority": 4,
+        "complexity": "medium",
+        "payload": {
+            "operation": "classification",
+            "samples": 5000
+        },
+        "estimated_duration": 1.85,
+        "created_at": "2026-10-08T15:29:07.315743",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-035",
+        "task_type": "ml",
+        "priority": 4,
+        "complexity": "medium",
+        "payload": {
+            "operation": "prediction",
+            "samples": 1000
+        },
+        "estimated_duration": 4.7,
+        "created_at": "2026-10-08T15:29:07.315746",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-036",
+        "task_type": "io",
+        "priority": 1,
+        "complexity": "high",
+        "payload": {
+            "operation": "json_processing",
+            "records": 5000
+        },
+        "estimated_duration": 9.86,
+        "created_at": "2026-10-08T15:29:07.315748",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-037",
+        "task_type": "data",
+        "priority": 1,
+        "complexity": "low",
+        "payload": {
+            "operation": "data_transformation",
+            "columns": 15
+        },
+        "estimated_duration": 7.55,
+        "created_at": "2026-10-08T15:29:07.315750",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-038",
+        "task_type": "text",
+        "priority": 1,
+        "complexity": "low",
+        "payload": {
+            "operation": "tokenization",
+            "words": 10000
+        },
+        "estimated_duration": 2.71,
+        "created_at": "2026-10-08T15:29:07.315752",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-039",
+        "task_type": "text",
+        "priority": 4,
+        "complexity": "low",
+        "payload": {
+            "operation": "text_analysis",
+            "documents": 500
+        },
+        "estimated_duration": 2.65,
+        "created_at": "2026-10-08T15:29:07.315755",
+        "status": "PENDING"
+    },
+    {
+        "task_id": "TASK-040",
+        "task_type": "ml",
+        "priority": 4,
+        "complexity": "low",
+        "payload": {
+            "operation": "classification",
+            "samples": 5000
+        },
+        "estimated_duration": 4.99,
+        "created_at": "2026-10-08T15:29:07.315757",
+        "status": "PENDING"
+    }
+]
