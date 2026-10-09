@@ -9,3 +9,7 @@ node_modules/
 dist/
 build/
 *.egg-info/
+
+# Day 6 generated soak output and offline packages
+experiments/day6_soak_results.csv
+wheelhouse/

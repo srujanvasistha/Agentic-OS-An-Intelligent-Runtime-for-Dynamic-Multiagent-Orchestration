@@ -19,6 +19,7 @@ from agents.general_agent import GeneralAgent
 from agents.task_router import TaskRouter
 from llm.client import MockLLMClient
 from results_csv import RESULT_COLUMNS
+from reproducibility import configure_reproducibility
 from scheduler.fifo import FIFOScheduler
 from scheduler.runtime import AgentRuntime
 from scheduler.task_manager import TaskManager
@@ -30,6 +31,7 @@ OUTPUT = ROOT / "experiments" / "day5_mock_workload.csv"
 
 
 def main() -> None:
+    seed = configure_reproducibility()
     registry = AgentRegistry()
     registry.register("GeneralAgent", GeneralAgent(llm_client=MockLLMClient()))
     manager = AgentManager(registry, TaskRouter())
@@ -61,7 +63,7 @@ def main() -> None:
     assert len(rows) == len(workload)
     assert {row["llm_backend"] for row in rows} == {"mock"}
 
-    print(f"Day 5 MockLLM workload: {len(rows)} tasks completed")
+    print(f"Day 5 MockLLM workload: {len(rows)} tasks completed (seed={seed})")
     print(f"CSV schema validated: {OUTPUT}")
 
 

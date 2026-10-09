@@ -1,8 +1,9 @@
-fastapi
-uvicorn[standard]
-pydantic
-requests
-psutil
-python-dotenv
-pytest
-httpx
+# Exact direct-dependency versions captured in the Day 6 validation environment. Verify wheel availability for the target OS/Python.
+fastapi==0.128.2
+uvicorn[standard]==0.48.0
+pydantic==2.13.5
+requests==2.32.5
+psutil==7.2.2
+python-dotenv==1.2.2
+pytest==9.0.2
+httpx==0.28.1

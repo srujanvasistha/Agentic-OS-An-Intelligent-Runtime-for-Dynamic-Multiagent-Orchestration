@@ -18,15 +18,18 @@ class TaskManager:
         return task
 
     def next_task(self) -> Task | None:
-        task = self.scheduler.next_task()
-        if task is None:
-            return None
-        if task.status != TaskStatus.QUEUED:
-            return self.next_task()
-        task.status = TaskStatus.RUNNING
-        task.started_at = datetime.now()
-        self.store.add(task)
-        return task
+        # Iterative stale-entry skipping avoids recursion depth failures when a
+        # scheduler contains many cancelled/already-completed queue entries.
+        while True:
+            task = self.scheduler.next_task()
+            if task is None:
+                return None
+            if task.status != TaskStatus.QUEUED:
+                continue
+            task.status = TaskStatus.RUNNING
+            task.started_at = datetime.now()
+            self.store.add(task)
+            return task
 
     def mark_done(self, task: Task) -> None:
         task.status = TaskStatus.DONE

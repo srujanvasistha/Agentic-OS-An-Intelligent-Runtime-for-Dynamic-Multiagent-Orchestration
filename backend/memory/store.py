@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass
 from datetime import datetime
+from threading import RLock
 
 
 @dataclass
@@ -27,6 +28,7 @@ class MemoryStore:
             raise ValueError("max_entries must be positive")
         self.max_entries = max_entries
         self._entries: deque[MemoryEntry] = deque(maxlen=max_entries)
+        self._lock = RLock()
 
     def remember(self, task_id: str, prompt: str, status: str, response: str) -> MemoryEntry:
         entry = MemoryEntry(
@@ -36,13 +38,15 @@ class MemoryStore:
             response=response,
             timestamp=datetime.now().isoformat(),
         )
-        self._entries.append(entry)
+        with self._lock:
+            self._entries.append(entry)
         return entry
 
     def recent(self, limit: int = 5) -> list[MemoryEntry]:
         if limit < 1:
             return []
-        return list(self._entries)[-limit:][::-1]
+        with self._lock:
+            return list(self._entries)[-limit:][::-1]
 
     def context_for(self, prompt: str, limit: int = 3) -> str:
         """Return concise recent context relevant to the current request.
@@ -52,7 +56,9 @@ class MemoryStore:
         """
         query_terms = {term.lower() for term in prompt.split() if len(term) > 2}
         candidates = []
-        for entry in self._entries:
+        with self._lock:
+            snapshot = list(self._entries)
+        for entry in snapshot:
             terms = set(entry.prompt.lower().split())
             score = len(query_terms & terms)
             candidates.append((score, entry.timestamp, entry))
@@ -71,7 +77,9 @@ class MemoryStore:
         return "\n".join(lines)
 
     def clear(self) -> None:
-        self._entries.clear()
+        with self._lock:
+            self._entries.clear()
 
     def size(self) -> int:
-        return len(self._entries)
+        with self._lock:
+            return len(self._entries)

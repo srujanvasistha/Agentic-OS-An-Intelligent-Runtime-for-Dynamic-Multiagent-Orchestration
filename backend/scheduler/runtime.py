@@ -54,7 +54,7 @@ class AgentRuntime:
             setter(self.get_system_state())
 
     def _select_model_tier(self, task: Task, state: dict) -> str:
-        configured = os.getenv("AGENTOS_MODEL_TIER", self.model_tier).lower()
+        configured = self.model_tier
         # Resource-aware scheduling uses the small tier under sustained pressure.
         if getattr(self.task_manager.scheduler, "name", "") == "resource_aware":
             pressure = max(float(state.get("cpu_percent", 0)), float(state.get("memory_percent", 0)))
