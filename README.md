@@ -167,7 +167,7 @@ $$
 S(t,\tau,R) = W_P \cdot P(t) + W_U \cdot U(t,\tau) - W_C \cdot C(t)\cdot(1+R) - W_T \cdot T(t) - W_K \cdot K(t)\cdot R
 $$
 
-**Deadline urgency**, with $\Delta\tau = D(t) - \tau$ and $D(t) = \tau_{submit} + \text{deadline\_s}$:
+**Deadline urgency**, with $\Delta\tau = D(t) - \tau$ and $D(t) = \tau_{submit} + d_{rel}$, where $d_{rel}$ is the task's relative deadline in seconds:
 
 $$
 U(t,\tau)=
@@ -246,7 +246,7 @@ $$
 $$
 
 $$
-\text{simulated\_latency} = \max\left(\Delta\tau_{exec},\ \frac{\text{tokens}}{20.32}\right)
+\text{latency}_{sim} = \max\left(\Delta\tau_{exec},\ \frac{\text{tokens}}{20.32}\right)
 $$
 
 **Auto-detection:** If `AGENTOS_LLM_BACKEND` is unset, `create_llm_client()` queries `http://127.0.0.1:11434/api/tags`. If Ollama is unreachable or `qwen2.5:1.5b` is missing, it falls back to `MockLLMClient` with zero code changes.
@@ -338,7 +338,7 @@ $$
 | Remove $W_{PRIORITY}$ | **117.09 ± 5.35** | 269.10 ± 8.69 | 1.34 ± 0.75 |
 | Remove $W_{URGENCY}$ | 130.91 ± 4.18 | 269.10 ± 8.69 | 3.00 ± 0.74 |
 | Remove $W_{COMPLEXITY}$ | 131.94 ± 3.67 | 269.10 ± 8.69 | 1.34 ± 0.75 |
-| Remove $W_{TOKEN\_COST}$ | 136.92 ± 3.96 | 269.10 ± 8.69 | 1.34 ± 0.75 |
+| Remove $W_{T}$ (token cost) | 136.92 ± 3.96 | 269.10 ± 8.69 | 1.34 ± 0.75 |
 | Remove $W_{RISK}$ | 130.69 ± 4.75 | 269.10 ± 8.69 | 1.67 ± 1.18 |
 
 - **Removing priority** cut mean completion time by ~10.6%, because high-priority tasks are often heavy and delay many smaller ones.
@@ -427,30 +427,65 @@ Benchmark outputs are written to `simulated_results.csv` and `experiment_summary
 
 ```text
 .
-├── backend/
-│   ├── main.py                  # FastAPI runtime & gateway
-│   ├── schemas.py               # Data contracts & task state machine
+├── backend/                     # FastAPI runtime and core system layer
+│   ├── main.py                  # Gateway and runtime entry point
+│   ├── schemas.py               # Data contracts and task state machine
 │   ├── web_events.py            # WebSocket event cursor buffer
-│   ├── agents/                  # Specialized agents, task router & decomposer
+│   ├── agents/
+│   │   ├── agent_manager.py
+│   │   ├── agent_registry.py
+│   │   ├── base_agent.py
+│   │   ├── general_agent.py
+│   │   ├── file_agent.py
+│   │   ├── security_agent.py
+│   │   ├── monitoring_agent.py
+│   │   ├── planning_agent.py
+│   │   ├── image_agent.py
+│   │   ├── task_router.py       # Semantic intent routing
+│   │   └── task_decomposer.py   # Multi-agent job decomposition
+│   ├── llm/
+│   │   └── client.py            # LLMClient, Ollama and Mock backends
 │   ├── scheduler/
 │   │   ├── base.py
 │   │   ├── fifo.py
 │   │   ├── priority.py
 │   │   ├── round_robin.py
 │   │   ├── resource_aware.py
+│   │   ├── task.py
+│   │   ├── task_executor.py
 │   │   ├── task_store.py        # SQLite persistence
 │   │   └── runtime.py           # AgentRuntime engine
 │   ├── security/policy.py       # Default-deny capability policy engine
-│   ├── llm/client.py            # LLMClient, Ollama & Mock backends
 │   ├── search/semantic_search.py# TF-IDF semantic intent engine
 │   └── tools/                   # Sandboxed system tools
-├── frontend/src/                # React 19 + Vite SPA
-├── experiments/                 # Benchmark & security attack scripts
-├── paper/                       # Research paper & evaluation write-up
-└── results/                     # SQLite DB, CSVs, generated figures
+├── frontend/                    # React 19 + Vite single-page application
+├── dashboard/
+├── agents/                      # Base agent and manager modules
+├── scheduler/
+├── experiments/                 # Benchmark and security-attack scripts
+├── workload/                    # Workload definitions
+├── metrics/
+├── models/
+├── data/
+├── results/                     # SQLite database, CSVs, generated figures
+├── paper/                       # Evaluation write-up
+├── notes/
+├── p5/shell/
+├── scripts/
+├── installers/
+├── static/
+├── wheelhouse/
+├── make_graphs.py               # Figure generation
+├── legacy_system_checks.py
+├── runtime.py
+├── requirements.txt
+├── Dockerfile
+├── docker-compose.yml
+├── Makefile
+├── setup.sh
+├── run_demo.sh / run_demo.ps1 / run_demo.bat
+└── .env.example
 ```
-
----
 
 ## Limitations & Future Work
 
