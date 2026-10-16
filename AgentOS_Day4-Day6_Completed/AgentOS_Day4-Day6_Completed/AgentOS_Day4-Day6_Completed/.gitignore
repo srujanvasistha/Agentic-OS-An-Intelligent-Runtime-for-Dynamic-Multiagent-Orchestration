@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+\n# AgentOS local runtime and frontend build\nresults/agentos_tasks.sqlite3\nresults/agentos_tasks.sqlite3-shm\nresults/agentos_tasks.sqlite3-wal\nfrontend/node_modules/\n

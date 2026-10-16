@@ -1,0 +1,17 @@
+{
+  "source_file": "experiments/results.csv",
+  "note": "Metrics describe existing CSV rows, not necessarily a fresh run.",
+  "total_tasks": 34,
+  "p50_latency_seconds": 0.0,
+  "p95_latency_seconds": 0.1075,
+  "makespan_seconds": 316919.2248,
+  "total_tokens": 545,
+  "success_rate_percent": 100.0,
+  "deadline_misses": null,
+  "unsafe_actions_blocked": null,
+  "limitations": {
+    "deadline_misses": "Not recorded in the current CSV; deadline_s is not logged.",
+    "unsafe_actions_blocked": "The CSV does not record the reason for blocked tasks.",
+    "makespan": "Timestamp span across recorded tasks; not necessarily the actual runtime of a complete experiment."
+  }
+}

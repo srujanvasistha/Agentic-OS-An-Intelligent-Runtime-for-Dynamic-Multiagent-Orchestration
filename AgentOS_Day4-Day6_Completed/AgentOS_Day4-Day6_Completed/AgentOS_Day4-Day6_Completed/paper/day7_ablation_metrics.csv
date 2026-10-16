@@ -1,0 +1,7 @@
+configuration,seeds,mean_completion_mean_s,mean_completion_std_s,makespan_mean_s,makespan_std_s,deadline_success_mean_percent,deadline_success_std_percent,tokens_mean_per_run,tokens_std_per_run
+ResourceAware baseline,5,131.0058,4.1546,269.0999,8.6859,1.336,0.7468,23592.8,815.0182
+remove W_PRIORITY,5,117.0928,5.3522,269.0999,8.6859,1.336,0.7468,23592.8,815.0182
+remove W_URGENCY,5,130.9143,4.1811,269.0999,8.6859,2.998,0.7424,23592.8,815.0182
+remove W_COMPLEXITY,5,131.9428,3.6664,269.0999,8.6859,1.336,0.7468,23592.8,815.0182
+remove W_TOKEN_COST,5,136.9164,3.9554,269.0999,8.6859,1.336,0.7468,23592.8,815.0182
+remove W_RISK,5,130.6859,4.7455,269.0999,8.6859,1.668,1.1773,23592.8,815.0182

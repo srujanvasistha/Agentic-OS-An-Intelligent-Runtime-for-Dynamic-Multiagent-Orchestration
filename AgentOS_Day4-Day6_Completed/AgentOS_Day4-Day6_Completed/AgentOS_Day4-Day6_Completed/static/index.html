@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d19">
+  <title>AgentOS — AI Runtime Console</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="scene-grid" aria-hidden="true"></div>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div><div class="eyebrow">LOCAL AI RUNTIME</div><h1>Agent<span>OS</span></h1></div>
+      </div>
+      <div class="runtime-identity"><div class="core-wrap" aria-hidden="true"><div class="core-ring ring-a"></div><div class="core-ring ring-b"></div><div class="core-sphere"></div></div><div><div class="eyebrow">SYSTEM STATUS</div><div class="status-line"><i id="system-dot" class="status-dot"></i><strong id="system-status">Connecting</strong></div></div></div>
+      <div class="topbar-right"><span class="local-chip"><i></i> LOCAL / NO CDN</span><span id="clock" class="clock">--:--:--</span></div>
+    </header>
+
+    <section class="overview-strip" aria-label="Runtime overview">
+      <div class="overview-item"><span class="over-icon">◈</span><div><small>ACTIVE AGENTS</small><strong id="overview-agents">3</strong></div></div>
+      <div class="overview-item"><span class="over-icon">⌁</span><div><small>QUEUE DEPTH</small><strong id="overview-queue">0</strong></div></div>
+      <div class="overview-item"><span class="over-icon">ϟ</span><div><small>TOKENS USED</small><strong id="overview-tokens">0</strong></div></div>
+      <div class="overview-item"><span class="over-icon">◷</span><div><small>ACTIVE SCHEDULER</small><strong id="overview-scheduler">FIFO</strong></div></div>
+      <div class="scheduler-control"><label for="scheduler-select">SCHEDULER</label><select id="scheduler-select" aria-label="Change scheduler"><option value="fifo">FIFO</option><option value="rr">Round-Robin</option><option value="priority">Priority</option><option value="agentos">AgentOS Resource-Aware</option></select><span id="scheduler-note" class="muted-note">Changes apply live</span></div>
+    </section>
+
+    <main class="dashboard-grid">
+      <section class="panel shell-panel" aria-labelledby="shell-title">
+        <div class="panel-heading"><div class="heading-left"><span class="panel-symbol shell-symbol">›_</span><div><h2 id="shell-title">AI Shell</h2><p>Command interface · controlled runtime</p></div></div><span class="live-pill"><i></i> LIVE</span></div>
+        <div class="terminal-window">
+          <div class="terminal-toolbar"><div class="window-dots"><b></b><b></b><b></b></div><span>agentos://shell/session</span><button id="clear-terminal" class="text-button" type="button">CLEAR</button></div>
+          <div id="terminal-output" class="terminal-output" role="log" aria-live="polite" aria-label="Shell output">
+            <div class="term-banner">AGENTOS RUNTIME <span>v0.4</span></div>
+            <div class="term-muted">A capability-controlled AI shell is ready.</div>
+            <div class="term-muted">Built-ins: <b>help</b>, <b>status</b>, <b>history</b>, <b>scheduler &lt;fifo|rr|priority|agentos&gt;</b></div>
+            <div class="term-muted">Submit an AI request with <b>run &lt;request&gt;</b> or type a request directly.</div>
+          </div>
+          <form id="shell-form" class="terminal-form" autocomplete="off">
+            <label for="shell-input" class="prompt-sign">agentos <span>›</span></label>
+            <input id="shell-input" name="command" type="text" maxlength="12000" placeholder="run summarize the scheduler architecture" spellcheck="false" autocomplete="off" autofocus>
+            <button id="submit-command" type="submit" aria-label="Submit command"><span>↵</span></button>
+          </form>
+          <div class="terminal-footer"><span><i class="tiny-green"></i> INPUT SANDBOXED</span><span>NO BASH ACCESS</span><span id="shell-connection">WS CONNECTING</span></div>
+        </div>
+      </section>
+
+      <section class="panel queue-panel" aria-labelledby="queue-title">
+        <div class="panel-heading"><div class="heading-left"><span class="panel-symbol queue-symbol">≋</span><div><h2 id="queue-title">Task Queue</h2><p>Live execution lifecycle</p></div></div><span id="queue-count" class="count-pill">0 tasks</span></div>
+        <div class="queue-legend"><span><i class="legend-dot queued"></i>Queued</span><span><i class="legend-dot running"></i>Running</span><span><i class="legend-dot done"></i>Done</span></div>
+        <div id="queue-list" class="queue-list"><div class="empty-state"><span>◇</span><p>No tasks yet</p><small>Submit a request in the AI shell.</small></div></div>
+      </section>
+
+      <section class="panel monitor-panel" aria-labelledby="monitor-title">
+        <div class="panel-heading"><div class="heading-left"><span class="panel-symbol monitor-symbol">ϟ</span><div><h2 id="monitor-title">System Monitor</h2><p>Host resources · runtime metrics</p></div></div><span class="refresh-indicator"><i></i> AUTO REFRESH</span></div>
+        <div class="metrics-grid">
+          <div class="metric-card"><div class="metric-top"><span>CPU LOAD</span><span class="metric-glyph">⌁</span></div><div class="metric-value"><strong id="cpu-value">—</strong><small>%</small></div><div class="meter"><span id="cpu-meter" style="width:0%"></span></div><div class="metric-caption">Host processor usage</div></div>
+          <div class="metric-card"><div class="metric-top"><span>MEMORY</span><span class="metric-glyph">▤</span></div><div class="metric-value"><strong id="ram-value">—</strong><small>%</small></div><div class="meter purple"><span id="ram-meter" style="width:0%"></span></div><div id="ram-caption" class="metric-caption">Host RAM utilization</div></div>
+          <div class="metric-card"><div class="metric-top"><span>TOKENS</span><span class="metric-glyph">ϟ</span></div><div class="metric-value"><strong id="token-value">0</strong><small>total</small></div><div class="metric-caption">Reported by completed tasks</div></div>
+          <div class="metric-card"><div class="metric-top"><span>LATENCY</span><span class="metric-glyph">◷</span></div><div class="metric-value"><strong id="latency-value">—</strong><small>sec</small></div><div class="metric-caption">Latest task runtime</div></div>
+        </div>
+        <div class="monitor-bottom"><div><span class="mini-label">LLM BACKEND</span><strong id="backend-value">—</strong></div><div><span class="mini-label">MODEL</span><strong id="model-value">Qwen2.5 · 1.5B</strong></div><div><span class="mini-label">COMPLETED</span><strong id="done-value">0</strong></div></div>
+      </section>
+
+      <section class="panel blocked-panel" aria-labelledby="blocked-title">
+        <div class="panel-heading"><div class="heading-left"><span class="panel-symbol blocked-symbol">⛨</span><div><h2 id="blocked-title">Blocked Actions</h2><p>Server-side policy audit</p></div></div><span id="blocked-count" class="blocked-count">0 DENIED</span></div>
+        <div id="blocked-list" class="blocked-list"><div class="empty-state compact"><span>✓</span><p>No blocked actions recorded</p><small>Denied policy calls will appear here.</small></div></div>
+      </section>
+    </main>
+    <footer class="app-footer"><span>AGENTOS / INTELLIGENT RUNTIME FOR DYNAMIC MULTI-AGENT ORCHESTRATION</span><span><i class="tiny-green"></i> SERVER-ENFORCED POLICY</span><span id="last-refresh">INITIALIZING METRICS</span></footer>
+  </div>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

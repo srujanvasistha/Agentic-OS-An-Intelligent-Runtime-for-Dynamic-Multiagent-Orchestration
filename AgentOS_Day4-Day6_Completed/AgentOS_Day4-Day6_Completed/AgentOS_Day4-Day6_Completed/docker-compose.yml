@@ -1,0 +1,26 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama-data:/root/.ollama
+    expose:
+      - "11434"
+    restart: unless-stopped
+
+  agentos:
+    build: .
+    depends_on:
+      - ollama
+    environment:
+      AGENTOS_LLM_BACKEND: "${AGENTOS_LLM_BACKEND:-ollama}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-qwen2.5:1.5b}"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      AGENTOS_DB_PATH: "/app/results/agentos_tasks.sqlite3"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./results:/app/results
+    restart: unless-stopped
+
+volumes:
+  ollama-data:

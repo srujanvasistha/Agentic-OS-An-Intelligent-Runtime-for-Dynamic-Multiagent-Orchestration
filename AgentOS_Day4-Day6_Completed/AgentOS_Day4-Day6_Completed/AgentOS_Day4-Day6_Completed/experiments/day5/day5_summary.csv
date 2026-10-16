@@ -1,0 +1,5 @@
+backend,scheduler,tasks,successful_tasks,failed_tasks,p95_latency_seconds,makespan_seconds,deadline_success_percent,tokens,aggregate_tokens_per_second,mean_system_memory_percent
+mock,FIFO,12,12,0,15.979,18.0726,100.0,366,20.3198,81.63
+mock,RoundRobin,12,12,0,15.969,18.0636,100.0,366,20.3198,82.7
+mock,Priority,12,12,0,16.7778,18.0665,100.0,366,20.3198,83.47
+mock,ResourceAware,12,12,0,16.7854,18.0734,100.0,366,20.3198,82.75
